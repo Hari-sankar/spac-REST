@@ -4,6 +4,7 @@ import (
 	"context"
 	"spac-REST/api/models"
 	"spac-REST/api/repository"
+	"spac-REST/api/schemas"
 )
 
 type AuthUseCase struct {
@@ -15,9 +16,15 @@ func NewAuthUseCase(authRepo repository.AuthRepository) *AuthUseCase {
 }
 
 // Register handles user registration
-func (auth *AuthUseCase) SignUp(ctx context.Context, user *models.User) error {
+func (auth *AuthUseCase) SignUp(ctx context.Context, req *schemas.SignUpRequest) error {
 	// Add registration logic, such as validation, business rules, etc.
-	return auth.authRepo.SignUp(ctx, user)
+
+	var user models.User
+
+	user.Password = req.Password
+	user.Username = req.Username
+	user.Type = req.Type
+	return auth.authRepo.SignUp(ctx, &user)
 
 }
 

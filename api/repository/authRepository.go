@@ -11,7 +11,7 @@ import (
 
 type AuthRepository interface {
 	SignIn(ctx context.Context, id uint) (*models.User, error)
-	SignUp(ctx context.Context, user *models.User) error
+	SignUp(ctx context.Context, user *models.User) (error, int)
 }
 
 type authRepository struct {
@@ -31,27 +31,25 @@ func (r *authRepository) SignIn(ctx context.Context, id uint) (*models.User, err
 
 }
 
-func (r *authRepository) SignUp(ctx context.Context, user *models.User) error {
+func (r *authRepository) SignUp(ctx context.Context, user *models.User) (error, int) {
 	// return r.db.WithContext(ctx).Create(user).Error
 	query := `INSERT INTO users (id, email, password, name, profile_picture_url, phone_number, role, created_at, updated_at)
 	          VALUES (@ID, @Email, @Password, @Name, @ProfilePictureURL, @PhoneNumber, @Role, @CreatedAt, @UpdatedAt)`
 
 	args := pgx.NamedArgs{
 		"ID":                user.ID,
-		"Email":             user.Email,
 		"Password":          user.Password,
-		"Name":              user.Name,
-		"ProfilePictureURL": user.ProfilePictureURL,
-		"PhoneNumber":       user.PhoneNumber,
-		"Role":              user.Role,
+		"Name":              user.Username,
+		"ProfilePictureURL": user.Avatar,
+		"Role":              user.Type,
 		"CreatedAt":         user.CreatedAt,
 		"UpdatedAt":         user.UpdatedAt,
 	}
 
 	_, err := r.db.Exec(ctx, query, args)
 	if err != nil {
-		return fmt.Errorf("unable to insert row: %w", err)
+		return fmt.Errorf("unable to insert row: %w", err), 0
 	}
 
-	return nil
+	return nil, 1
 }

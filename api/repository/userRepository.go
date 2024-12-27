@@ -41,12 +41,10 @@ func (r *userRepository) CreateUser(ctx context.Context, user *models.User) erro
 
 	args := pgx.NamedArgs{
 		"ID":                user.ID,
-		"Email":             user.Email,
 		"Password":          user.Password,
-		"Name":              user.Name,
-		"ProfilePictureURL": user.ProfilePictureURL,
-		"PhoneNumber":       user.PhoneNumber,
-		"Role":              user.Role,
+		"Name":              user.Username,
+		"ProfilePictureURL": user.Avatar,
+		"Role":              user.Type,
 		"CreatedAt":         user.CreatedAt,
 		"UpdatedAt":         user.UpdatedAt,
 	}
@@ -65,12 +63,10 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *models.User) erro
 
 	args := pgx.NamedArgs{
 		"ID":                user.ID,
-		"Email":             user.Email,
 		"Password":          user.Password,
-		"Name":              user.Name,
-		"ProfilePictureURL": user.ProfilePictureURL,
-		"PhoneNumber":       user.PhoneNumber,
-		"Role":              user.Role,
+		"Name":              user.Username,
+		"ProfilePictureURL": user.Avatar,
+		"Role":              user.Type,
 		"UpdatedAt":         user.UpdatedAt,
 	}
 
@@ -109,8 +105,8 @@ func (r *userRepository) GetAllUsers(ctx context.Context) ([]models.User, error)
 	for rows.Next() {
 		var user models.User
 		err := rows.Scan(
-			&user.ID, &user.Email, &user.Password, &user.Name,
-			&user.ProfilePictureURL, &user.PhoneNumber, &user.Role,
+			&user.ID, &user.Password, &user.Username,
+			&user.Avatar, &user.Type,
 			&user.CreatedAt, &user.UpdatedAt,
 		)
 		if err != nil {

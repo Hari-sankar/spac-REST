@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"net/http"
-	"spac-REST/api/models"
+	"spac-REST/api/schemas"
 	"spac-REST/api/usecases"
 	"strconv"
 
@@ -36,13 +36,13 @@ func (ctrl *AuthController) SignIn(c *gin.Context) {
 
 func (ctrl *AuthController) SignUp(c *gin.Context) {
 	ctx := c.Request.Context()
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
+	var req schemas.SignUpRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := ctrl.authUseCase.SignUp(ctx, &user); err != nil {
+	if err := ctrl.authUseCase.SignUp(ctx, &req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
