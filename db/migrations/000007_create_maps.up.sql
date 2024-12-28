@@ -1,0 +1,6 @@
+CREATE TABLE maps (
+    id VARCHAR(255) PRIMARY KEY,
+    width INTEGER NOT NULL,
+    height INTEGER NOT NULL,
+    name VARCHAR(255) NOT NULL
+);
