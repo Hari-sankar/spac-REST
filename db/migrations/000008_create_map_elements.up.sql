@@ -1,7 +1,7 @@
 CREATE TABLE map_elements (
-    id VARCHAR(255) PRIMARY KEY,
-    map_id VARCHAR(255) NOT NULL,
-    element_id VARCHAR(255),
+    id SERIAL PRIMARY KEY,
+    map_id INTEGER NOT NULL,
+    element_id INTEGER NOT NULL,
     x INTEGER,
     y INTEGER,
     FOREIGN KEY (map_id) REFERENCES maps(id),

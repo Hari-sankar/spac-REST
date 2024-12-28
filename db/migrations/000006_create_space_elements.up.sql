@@ -1,7 +1,7 @@
 CREATE TABLE space_elements (
-    id VARCHAR(255) PRIMARY KEY,
-    element_id VARCHAR(255) NOT NULL,
-    space_id VARCHAR(255) NOT NULL,
+    id SERIAL PRIMARY KEY,
+    element_id INTEGER NOT NULL,
+    space_id INTEGER NOT NULL,
     x INTEGER NOT NULL,
     y INTEGER NOT NULL,
     FOREIGN KEY (element_id) REFERENCES elements(id),
