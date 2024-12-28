@@ -4,14 +4,17 @@ import (
 	"context"
 	"fmt"
 	"spac-REST/api/models"
+	"spac-REST/api/schemas"
+	"spac-REST/api/utils"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type AuthRepository interface {
-	SignIn(ctx context.Context, id uint) (*models.User, error)
-	SignUp(ctx context.Context, user *models.User) (error, int)
+	GetUserByUsername(ctx context.Context, username string) (*models.User, error)
+	CreateUser(ctx context.Context, user *models.User) (int, error)
 }
 
 type authRepository struct {
@@ -22,34 +25,50 @@ func NewAuthRepository(db *pgxpool.Pool) AuthRepository {
 	return &authRepository{db: db}
 }
 
-func (r *authRepository) SignIn(ctx context.Context, id uint) (*models.User, error) {
-	var user models.User
-	// if err := r.db.WithContext(ctx).First(&user, id).Error; err != nil {
-	// 	return nil, err
-	// }
-	return &user, nil
-
-}
-
-func (r *authRepository) SignUp(ctx context.Context, user *models.User) (error, int) {
-	// return r.db.WithContext(ctx).Create(user).Error
-	query := `INSERT INTO users (id, email, password, name, profile_picture_url, phone_number, role, created_at, updated_at)
-	          VALUES (@ID, @Email, @Password, @Name, @ProfilePictureURL, @PhoneNumber, @Role, @CreatedAt, @UpdatedAt)`
+func (r *authRepository) CreateUser(ctx context.Context, user *models.User) (int, error) {
+	query := `INSERT INTO users (username, password, role)
+			  VALUES (@Username, @Password, @Role)
+			  RETURNING id`
 
 	args := pgx.NamedArgs{
-		"ID":                user.ID,
-		"Password":          user.Password,
-		"Name":              user.Username,
-		"ProfilePictureURL": user.Avatar,
-		"Role":              user.Type,
-		"CreatedAt":         user.CreatedAt,
-		"UpdatedAt":         user.UpdatedAt,
+		"Username": user.Username,
+		"Password": user.Password,
+		"Role":     user.Type,
 	}
 
-	_, err := r.db.Exec(ctx, query, args)
+	var id int
+	err := r.db.QueryRow(ctx, query, args).Scan(&id)
 	if err != nil {
-		return fmt.Errorf("unable to insert row: %w", err), 0
+
+		// Check for unique constraint violation
+		if pgErr, ok := err.(*pgconn.PgError); ok {
+			if pgErr.Code == "23505" { // PostgreSQL unique violation code
+				return 0, utils.NewErrorStruct(400, fmt.Sprintf("username %s already exists", user.Username))
+			}
+		}
+		return 0, utils.NewErrorStruct(500, fmt.Sprintf("unable to create user: %v", err))
 	}
 
-	return nil, 1
+	return id, nil
+}
+
+func (r *authRepository) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
+	query := `SELECT id, username, password, role FROM users WHERE username = $1`
+
+	var user models.User
+	err := r.db.QueryRow(ctx, query, username).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Password,
+		&user.Type,
+	)
+
+	if err == pgx.ErrNoRows {
+		return nil, schemas.ErrUserNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

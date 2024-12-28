@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"spac-REST/api/schemas"
 	"spac-REST/api/usecases"
-	"strconv"
+	"spac-REST/api/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,33 +19,38 @@ func NewAuthController(authUseCase usecases.AuthUseCase) *AuthController {
 
 func (ctrl *AuthController) SignIn(c *gin.Context) {
 	ctx := c.Request.Context()
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+
+	var req schemas.SignInRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.Error(schemas.ErrInvalidInput)
 		return
 	}
 
-	user, err := ctrl.authUseCase.SignIn(ctx, uint(id))
+	response, err := ctrl.authUseCase.SignIn(ctx, req.Username, req.Password)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		c.Error(err)
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, response)
 }
 
+// funtion to handle the user signup
 func (ctrl *AuthController) SignUp(c *gin.Context) {
 	ctx := c.Request.Context()
+	var err error
+	var response *schemas.SignUpResponse
 	var req schemas.SignUpRequest
+
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.Error(utils.NewErrorStruct(400, err.Error()))
 		return
 	}
 
-	if err := ctrl.authUseCase.SignUp(ctx, &req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	if response, err = ctrl.authUseCase.SignUp(ctx, &req); err != nil {
+		c.Error(err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, user)
+	c.JSON(http.StatusCreated, response)
 }

@@ -12,7 +12,7 @@ import (
 
 // Claims defines the data stored in the JWT token
 type Claims struct {
-	UserID    int       `json:"userID"`
+	UserID    uint      `json:"userID"`
 	UserName  string    `json:"userName"`
 	ExpiresAt time.Time `json:"expiry"`
 	jwt.RegisteredClaims
@@ -78,17 +78,17 @@ func GenerateRefreshTokens() (*string, error) {
 
 }
 
-func GenerateAcessToken(payload *Claims) (*string, error) {
+func GenerateAcessToken(payload *Claims) (string, error) {
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 
 	acessToken, err := jwtToken.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
 
 	if err != nil {
-		return nil, NewErrorStruct(400, "error generating JWT Token")
+		return "", NewErrorStruct(400, "error generating JWT Token")
 	}
 
-	return &acessToken, nil
+	return acessToken, nil
 
 }
 

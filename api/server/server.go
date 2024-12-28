@@ -1,6 +1,7 @@
 package server
 
 import (
+	middleware "spac-REST/api/middlewares"
 	"spac-REST/pkg/logger"
 	"time"
 
@@ -16,8 +17,10 @@ type Server struct {
 }
 
 func NewServer(db *pgxpool.Pool, logger logger.Logger) *Server {
-
+	// Create new gin engine with our logger
+	router := gin.Default()
 	return &Server{
+		router: router,
 		db:     db,
 		logger: logger,
 	}
@@ -26,11 +29,12 @@ func NewServer(db *pgxpool.Pool, logger logger.Logger) *Server {
 
 func (s *Server) Run() {
 
-	//Initialise Gin router
-	router := gin.Default()
+	// Use recovery and your custom logger middleware
+	s.router.Use(gin.Recovery())
+	s.router.Use(middleware.LoggerMiddleware(s.logger))
 
 	// CORS configuration allowing all origins with flexible customization
-	router.Use(cors.New(cors.Config{
+	s.router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
@@ -46,11 +50,11 @@ func (s *Server) Run() {
 		},
 	}))
 
-	//attach router to server
-	s.router = router
+	//Attaching some global middlewares
+	s.router.Use(middleware.ErrorHandler())
 
 	//Map all routes to server
 	s.MapRoutes()
 
-	router.Run(":3000")
+	s.router.Run(":3000")
 }

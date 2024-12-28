@@ -25,7 +25,7 @@ func Run() {
 	appLogger.Infof("Initialized logger")
 
 	//Initialising db
-	connectionURL := os.Getenv("DB_URL")
+	connectionURL := os.Getenv("DATABASE_URL")
 
 	psqlDB, err := postgres.NewPsqlDB(connectionURL)
 	if err != nil {

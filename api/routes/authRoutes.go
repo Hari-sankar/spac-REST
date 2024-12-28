@@ -10,10 +10,10 @@ import (
 func RegisterAuthRoutes(router *gin.Engine, authUseCases usecases.AuthUseCase) {
 	authController := controllers.NewAuthController(authUseCases)
 
-	userRoutes := router.Group("/users")
+	userRoutes := router.Group("/auth")
 	{
 		userRoutes.POST("/signup", authController.SignUp)
-		userRoutes.GET("/signin", authController.SignIn)
+		userRoutes.POST("/signin", authController.SignIn)
 
 	}
 }
