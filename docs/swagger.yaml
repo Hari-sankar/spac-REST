@@ -230,7 +230,7 @@ paths:
     get:
       description: Get metadata for multiple users
       parameters:
-      - description: 'User IDs array format: [1,2,3]'
+      - description: 'User IDs array format: [uuid1,uuid2,uuid3]'
         in: query
         name: ids
         required: true
