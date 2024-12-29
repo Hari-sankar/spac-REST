@@ -17,6 +17,17 @@ func NewAuthController(authUseCase usecases.AuthUseCase) *AuthController {
 	return &AuthController{authUseCase: authUseCase}
 }
 
+// SignIn godoc
+// @Summary Login user
+// @Description Authenticate user and return JWT token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body schemas.SignInRequest true "Sign in credentials"
+// @Success 200 {object} schemas.SignInResponse
+// @Failure 401 {object} utils.ErrorStruct "Invalid credentials"
+// @Failure 500 {object} utils.ErrorStruct "Internal server error"
+// @Router /auth/signin [post]
 func (ctrl *AuthController) SignIn(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -35,6 +46,18 @@ func (ctrl *AuthController) SignIn(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// SignUp godoc
+// @Summary Register a new user
+// @Description Register a new user with username, password and type
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body schemas.SignUpRequest true "Sign up request"
+// @Success 200 {object} schemas.SignUpResponse
+// @Failure 400 {object} utils.ErrorStruct
+// @Failure 409 {object} utils.ErrorStruct "Username already exists"
+// @Failure 503 {object} utils.ErrorStruct "Database connection error"
+// @Router /auth/signup [post]
 // funtion to handle the user signup
 func (ctrl *AuthController) SignUp(c *gin.Context) {
 	ctx := c.Request.Context()

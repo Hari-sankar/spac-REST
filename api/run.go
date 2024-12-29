@@ -6,6 +6,7 @@ import (
 	"spac-REST/api/server"
 	"spac-REST/pkg/database/postgres"
 	"spac-REST/pkg/logger"
+	"spac-REST/pkg/swagger"
 
 	"github.com/joho/godotenv"
 )
@@ -35,8 +36,12 @@ func Run() {
 	}
 	defer psqlDB.Close()
 
+	// Generate fresh docs on startup
+	swagger.GenerateSwaggerDocs()
+
 	//initialise server
 	server := server.NewServer(psqlDB, appLogger)
+
 	server.Run()
 
 }
