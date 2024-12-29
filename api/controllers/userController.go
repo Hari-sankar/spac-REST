@@ -2,94 +2,52 @@ package controllers
 
 import (
 	"net/http"
-	"spac-REST/api/models"
+	"spac-REST/api/schemas"
 	"spac-REST/api/usecases"
-	"strconv"
+	"spac-REST/api/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 type UserController struct {
-	userUseCase usecases.UserUseCase
+	userUseCase *usecases.UserUseCase
 }
 
-func NewUserController(userUseCase usecases.UserUseCase) *UserController {
-	return &UserController{userUseCase: userUseCase}
+func NewUserController(userUseCase *usecases.UserUseCase) *UserController {
+	return &UserController{
+		userUseCase: userUseCase,
+	}
 }
 
-func (ctrl *UserController) GetUserByID(c *gin.Context) {
+// UpdateMetadata godoc
+// @Summary Update user metadata
+// @Description Update user's avatar and other metadata
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body schemas.UpdateMetadataRequest true "Update metadata request"
+// @Success 200 {object} schemas.UpdateMetadataResponse
+// @Failure 400 {object} utils.ErrorStruct "Invalid request"
+// @Failure 401 {object} utils.ErrorStruct "Invalid token"
+// @Failure 404 {object} utils.ErrorStruct "User not found"
+// @Router /users/metadata [post]
+func (ctrl *UserController) UpdateMetadata(c *gin.Context) {
 	ctx := c.Request.Context()
-	id, err := strconv.Atoi(c.Param("id"))
+	var req schemas.UpdateMetadataRequest
+
+	userID := c.GetInt("userID")
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.Error(utils.NewErrorStruct(400, err.Error()))
+		return
+	}
+
+	response, err := ctrl.userUseCase.UpdateMetadata(ctx, userID, &req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		c.Error(err)
 		return
 	}
 
-	user, err := ctrl.userUseCase.GetUserByID(ctx, uint(id))
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, user)
-}
-
-func (ctrl *UserController) CreateUser(c *gin.Context) {
-	ctx := c.Request.Context()
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if err := ctrl.userUseCase.Register(ctx, &user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusCreated, user)
-}
-
-func (ctrl *UserController) UpdateUser(c *gin.Context) {
-	ctx := c.Request.Context()
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if err := ctrl.userUseCase.UpdateUser(ctx, &user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, user)
-}
-
-func (ctrl *UserController) DeleteUser(c *gin.Context) {
-	ctx := c.Request.Context()
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
-		return
-	}
-
-	if err := ctrl.userUseCase.DeleteUser(ctx, uint(id)); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusNoContent, nil)
-}
-
-func (ctrl *UserController) GetAllUsers(c *gin.Context) {
-	ctx := c.Request.Context()
-
-	users, err := ctrl.userUseCase.GetAllUsers(ctx)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, response)
 }

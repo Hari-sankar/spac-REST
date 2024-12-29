@@ -20,6 +20,7 @@ func (s *Server) MapRoutes() {
 	authUseCase := usecases.NewAuthUseCase(authRepo)
 
 	// Initialize the Gin router
+	routes.RegisterTestRoutes(s.router)
 	routes.RegisterUserRoutes(s.router, *userUseCase)
 	routes.RegisterAuthRoutes(s.router, *authUseCase)
 
