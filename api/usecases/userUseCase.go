@@ -23,3 +23,14 @@ func (u *UserUseCase) UpdateMetadata(ctx context.Context, userID int, req *schem
 
 	return &schemas.UpdateMetadataResponse{Success: true}, nil
 }
+
+func (u *UserUseCase) GetUserMetadataBulk(ctx context.Context, userIDs []string) (*schemas.GetUserMetadataBulkResponse, error) {
+	metadata, err := u.userRepo.GetUserMetadataBulk(ctx, userIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	return &schemas.GetUserMetadataBulkResponse{
+		Avatars: metadata,
+	}, nil
+}

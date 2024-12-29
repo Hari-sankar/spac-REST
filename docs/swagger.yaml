@@ -1,5 +1,28 @@
 basePath: /
 definitions:
+  schemas.AvatarResponse:
+    properties:
+      id:
+        type: string
+      imageUrl:
+        type: string
+      name:
+        type: string
+    type: object
+  schemas.GetAvatarsResponse:
+    properties:
+      avatars:
+        items:
+          $ref: '#/definitions/schemas.AvatarResponse'
+        type: array
+    type: object
+  schemas.GetUserMetadataBulkResponse:
+    properties:
+      avatars:
+        items:
+          $ref: '#/definitions/schemas.UserMetadataResponse'
+        type: array
+    type: object
   schemas.SignInRequest:
     properties:
       password:
@@ -38,7 +61,7 @@ definitions:
   schemas.SignUpResponse:
     properties:
       userId:
-        type: integer
+        type: string
     type: object
   schemas.UpdateMetadataRequest:
     properties:
@@ -51,6 +74,13 @@ definitions:
     properties:
       success:
         type: boolean
+    type: object
+  schemas.UserMetadataResponse:
+    properties:
+      imageUrl:
+        type: string
+      userId:
+        type: string
     type: object
   utils.ErrorStruct:
     properties:
@@ -137,6 +167,29 @@ paths:
       summary: Register a new user
       tags:
       - auth
+  /avatars:
+    get:
+      description: Get list of all available avatars
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.GetAvatarsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      security:
+      - BearerAuth: []
+      summary: Get available avatars
+      tags:
+      - avatars
   /users/metadata:
     post:
       consumes:
@@ -171,6 +224,39 @@ paths:
       security:
       - BearerAuth: []
       summary: Update user metadata
+      tags:
+      - users
+  /users/metadata/bulk:
+    get:
+      description: Get metadata for multiple users
+      parameters:
+      - description: 'User IDs array format: [1,2,3]'
+        in: query
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.GetUserMetadataBulkResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      security:
+      - BearerAuth: []
+      summary: Get users metadata bulk
       tags:
       - users
 schemes:

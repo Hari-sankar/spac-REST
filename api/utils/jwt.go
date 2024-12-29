@@ -12,7 +12,7 @@ import (
 
 // Claims defines the data stored in the JWT token
 type Claims struct {
-	UserID    uint      `json:"userID"`
+	UserID    string    `json:"userID"`
 	UserName  string    `json:"userName"`
 	ExpiresAt time.Time `json:"expiry"`
 	jwt.RegisteredClaims

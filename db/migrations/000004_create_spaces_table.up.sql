@@ -4,6 +4,6 @@ CREATE TABLE spaces (
     "width" INTEGER NOT NULL,
     "height" INTEGER NOT NULL,
     "thumbnail" TEXT,
-    "creatorId" UUID NOT NULL,
-    CONSTRAINT "fk_creatorId" FOREIGN KEY ("creatorId") REFERENCES users ("id")
+    "creator_id" UUID NOT NULL,
+    CONSTRAINT "fk_creatorId" FOREIGN KEY ("creator_id") REFERENCES users ("id")
 );

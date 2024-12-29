@@ -14,6 +14,6 @@ func RegisterUserRoutes(router *gin.Engine, userUseCase usecases.UserUseCase) {
 	userRoutes := router.Group("/users").Use(middleware.AuthenticateRequest)
 	{
 		userRoutes.POST("/metadata", userController.UpdateMetadata)
-
+		userRoutes.GET("/metadata/bulk", userController.GetUserMetadataBulk)
 	}
 }

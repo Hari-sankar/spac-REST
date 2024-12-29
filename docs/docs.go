@@ -122,6 +122,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/avatars": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get list of all available avatars",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "avatars"
+                ],
+                "summary": "Get available avatars",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemas.GetAvatarsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    }
+                }
+            }
+        },
         "/users/metadata": {
             "post": {
                 "security": [
@@ -178,9 +215,97 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/metadata/bulk": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get metadata for multiple users",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get users metadata bulk",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User IDs array format: [1,2,3]",
+                        "name": "ids",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemas.GetUserMetadataBulkResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "schemas.AvatarResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "imageUrl": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemas.GetAvatarsResponse": {
+            "type": "object",
+            "properties": {
+                "avatars": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schemas.AvatarResponse"
+                    }
+                }
+            }
+        },
+        "schemas.GetUserMetadataBulkResponse": {
+            "type": "object",
+            "properties": {
+                "avatars": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schemas.UserMetadataResponse"
+                    }
+                }
+            }
+        },
         "schemas.SignInRequest": {
             "type": "object",
             "required": [
@@ -235,7 +360,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "userId": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },
@@ -255,6 +380,17 @@ const docTemplate = `{
             "properties": {
                 "success": {
                     "type": "boolean"
+                }
+            }
+        },
+        "schemas.UserMetadataResponse": {
+            "type": "object",
+            "properties": {
+                "imageUrl": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
                 }
             }
         },

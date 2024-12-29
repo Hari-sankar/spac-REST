@@ -14,7 +14,7 @@ import (
 
 type AuthRepository interface {
 	GetUserByUsername(ctx context.Context, username string) (*models.User, error)
-	CreateUser(ctx context.Context, user *models.User) (int, error)
+	CreateUser(ctx context.Context, user *models.User) (string, error)
 }
 
 type authRepository struct {
@@ -25,7 +25,7 @@ func NewAuthRepository(db *pgxpool.Pool) AuthRepository {
 	return &authRepository{db: db}
 }
 
-func (r *authRepository) CreateUser(ctx context.Context, user *models.User) (int, error) {
+func (r *authRepository) CreateUser(ctx context.Context, user *models.User) (string, error) {
 	query := `INSERT INTO users (username, password, role)
 			  VALUES (@Username, @Password, @Role)
 			  RETURNING id`
@@ -36,17 +36,17 @@ func (r *authRepository) CreateUser(ctx context.Context, user *models.User) (int
 		"Role":     user.Type,
 	}
 
-	var id int
+	var id string
 	err := r.db.QueryRow(ctx, query, args).Scan(&id)
 	if err != nil {
 
 		// Check for unique constraint violation
 		if pgErr, ok := err.(*pgconn.PgError); ok {
 			if pgErr.Code == "23505" { // PostgreSQL unique violation code
-				return 0, utils.NewErrorStruct(400, fmt.Sprintf("username %s already exists", user.Username))
+				return "", utils.NewErrorStruct(400, fmt.Sprintf("username %s already exists", user.Username))
 			}
 		}
-		return 0, utils.NewErrorStruct(500, fmt.Sprintf("unable to create user: %v", err))
+		return "", utils.NewErrorStruct(500, fmt.Sprintf("unable to create user: %v", err))
 	}
 
 	return id, nil

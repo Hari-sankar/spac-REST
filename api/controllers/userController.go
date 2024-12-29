@@ -5,6 +5,8 @@ import (
 	"spac-REST/api/schemas"
 	"spac-REST/api/usecases"
 	"spac-REST/api/utils"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -44,6 +46,44 @@ func (ctrl *UserController) UpdateMetadata(c *gin.Context) {
 	}
 
 	response, err := ctrl.userUseCase.UpdateMetadata(ctx, userID, &req)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// GetUserMetadataBulk godoc
+// @Summary Get users metadata bulk
+// @Description Get metadata for multiple users
+// @Tags users
+// @Produce json
+// @Security BearerAuth
+// @Param ids query string true "User IDs array format: [1,2,3]"
+// @Success 200 {object} schemas.GetUserMetadataBulkResponse
+// @Failure 400 {object} utils.ErrorStruct "Bad Request"
+// @Failure 401 {object} utils.ErrorStruct "Unauthorized"
+// @Failure 500 {object} utils.ErrorStruct "Internal Server Error"
+// @Router /users/metadata/bulk [get]
+func (ctrl *UserController) GetUserMetadataBulk(c *gin.Context) {
+	idsStr := c.Query("ids")
+	// Remove brackets
+	idsStr = strings.Trim(idsStr, "[]")
+
+	// Split by comma
+	userIDs := strings.Split(idsStr, ",")
+
+	// Validate each ID
+	for _, id := range userIDs {
+		// Check if ID is numeric
+		if _, err := strconv.Atoi(strings.TrimSpace(id)); err != nil {
+			c.Error(utils.NewErrorStruct(400, "Invalid ID format. All IDs must be numeric"))
+			return
+		}
+	}
+
+	response, err := ctrl.userUseCase.GetUserMetadataBulk(c.Request.Context(), userIDs)
 	if err != nil {
 		c.Error(err)
 		return
