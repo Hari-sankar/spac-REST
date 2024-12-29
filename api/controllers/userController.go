@@ -5,10 +5,10 @@ import (
 	"spac-REST/api/schemas"
 	"spac-REST/api/usecases"
 	"spac-REST/api/utils"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type UserController struct {
@@ -60,7 +60,7 @@ func (ctrl *UserController) UpdateMetadata(c *gin.Context) {
 // @Tags users
 // @Produce json
 // @Security BearerAuth
-// @Param ids query string true "User IDs array format: [1,2,3]"
+// @Param ids query string true "User IDs array format: [uuid1,uuid2,uuid3]"
 // @Success 200 {object} schemas.GetUserMetadataBulkResponse
 // @Failure 400 {object} utils.ErrorStruct "Bad Request"
 // @Failure 401 {object} utils.ErrorStruct "Unauthorized"
@@ -76,9 +76,9 @@ func (ctrl *UserController) GetUserMetadataBulk(c *gin.Context) {
 
 	// Validate each ID
 	for _, id := range userIDs {
-		// Check if ID is numeric
-		if _, err := strconv.Atoi(strings.TrimSpace(id)); err != nil {
-			c.Error(utils.NewErrorStruct(400, "Invalid ID format. All IDs must be numeric"))
+		// Check if ID is valid UUID
+		if _, err := uuid.Parse(strings.TrimSpace(id)); err != nil {
+			c.Error(utils.NewErrorStruct(400, "Invalid ID format. All IDs must be valid UUIDs"))
 			return
 		}
 	}
