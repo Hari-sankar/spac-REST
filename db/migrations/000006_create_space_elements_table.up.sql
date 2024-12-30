@@ -1,9 +1,7 @@
-CREATE TABLE space_elements (
+CREATE TABLE "spaceElements" (
     "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    "element_id" UUID NOT NULL,
-    "space_id" UUID NOT NULL,
+    "elementId" UUID NOT NULL REFERENCES "Element"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    "spaceId" UUID NOT NULL REFERENCES "Space"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     "x" INTEGER NOT NULL,
-    "y" INTEGER NOT NULL,
-    CONSTRAINT "fk_elementId" FOREIGN KEY ("element_id") REFERENCES elements ("id"),
-    CONSTRAINT "fk_spaceId" FOREIGN KEY ("space_id") REFERENCES spaces ("id")
+    "y" INTEGER NOT NULL
 );

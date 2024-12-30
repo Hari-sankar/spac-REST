@@ -1,2 +1,4 @@
-ALTER TABLE spaces ADD CONSTRAINT "fk_creator_spaces" FOREIGN KEY ("creator_id") REFERENCES users ("id");
-ALTER TABLE users ADD CONSTRAINT "fk_users_avatar" FOREIGN KEY ("avatar_id") REFERENCES avatars ("id");
+ALTER TABLE "User" ALTER COLUMN "avatarId" DROP NOT NULL;
+ALTER TABLE "User" DROP CONSTRAINT IF EXISTS "User_avatarId_fkey";
+ALTER TABLE "User" ADD CONSTRAINT "User_avatarId_fkey" 
+    FOREIGN KEY ("avatarId") REFERENCES "Avatar"("id") ON DELETE SET NULL ON UPDATE CASCADE;

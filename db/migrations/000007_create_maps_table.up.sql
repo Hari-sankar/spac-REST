@@ -1,4 +1,4 @@
-CREATE TABLE maps (
+CREATE TABLE "Map" (
     "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     "width" INTEGER NOT NULL,
     "height" INTEGER NOT NULL,

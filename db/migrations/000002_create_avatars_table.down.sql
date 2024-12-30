@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS avatars;
+DROP TABLE IF EXISTS "Avatar";

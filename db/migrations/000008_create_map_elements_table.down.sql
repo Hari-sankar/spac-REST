@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS map_elements;
+DROP TABLE IF EXISTS "MapElements";

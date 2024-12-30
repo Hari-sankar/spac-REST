@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS space_elements;
+DROP TABLE IF EXISTS "spaceElements";

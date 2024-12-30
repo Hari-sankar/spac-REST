@@ -1,2 +1,4 @@
-ALTER TABLE spaces DROP CONSTRAINT "fk_creator_spaces";
-ALTER TABLE users DROP CONSTRAINT "fk_users_avatar";
+ALTER TABLE "User" ALTER COLUMN "avatarId" SET NOT NULL;
+ALTER TABLE "User" DROP CONSTRAINT IF EXISTS "User_avatarId_fkey";
+ALTER TABLE "User" ADD CONSTRAINT "User_avatarId_fkey" 
+    FOREIGN KEY ("avatarId") REFERENCES "Avatar"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
