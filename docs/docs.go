@@ -234,7 +234,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User IDs array format: [1,2,3]",
+                        "description": "User IDs array format: [uuid1,uuid2,uuid3]",
                         "name": "ids",
                         "in": "query",
                         "required": true
