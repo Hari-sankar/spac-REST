@@ -2,122 +2,79 @@ package repository
 
 import (
 	"context"
-	"fmt"
-	"spac-REST/api/models"
+	"strconv"
 
-	"github.com/jackc/pgx/v5"
+	"spac-REST/api/schemas"
+	"spac-REST/api/utils"
+	"spac-REST/pkg/logger"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type UserRepository interface {
-	GetUserByID(ctx context.Context, id uint) (*models.User, error)
-	CreateUser(ctx context.Context, user *models.User) error
-	UpdateUser(ctx context.Context, user *models.User) error
-	DeleteUser(ctx context.Context, id uint) error
-	GetAllUsers(ctx context.Context) ([]models.User, error)
+	UpdateMetadata(ctx context.Context, userID int, avatarID string) error
+	GetUserMetadataBulk(ctx context.Context, userIDs []string) ([]schemas.UserMetadataResponse, error)
 }
-
 type userRepository struct {
 	db *pgxpool.Pool
 }
 
 func NewUserRepository(db *pgxpool.Pool) UserRepository {
-	return &userRepository{db: db}
-}
-
-func (r *userRepository) GetUserByID(ctx context.Context, id uint) (*models.User, error) {
-	var user models.User
-	// if err := r.db.WithContext(ctx).First(&user, id).Error; err != nil {
-	// 	return nil, err
-	// }
-	return &user, nil
-
-}
-
-func (r *userRepository) CreateUser(ctx context.Context, user *models.User) error {
-	// return r.db.WithContext(ctx).Create(user).Error
-	query := `INSERT INTO users (id, email, password, name, profile_picture_url, phone_number, role, created_at, updated_at)
-	          VALUES (@ID, @Email, @Password, @Name, @ProfilePictureURL, @PhoneNumber, @Role, @CreatedAt, @UpdatedAt)`
-
-	args := pgx.NamedArgs{
-		"ID":                user.ID,
-		"Password":          user.Password,
-		"Name":              user.Username,
-		"ProfilePictureURL": user.Avatar,
-		"Role":              user.Type,
-		"CreatedAt":         user.CreatedAt,
-		"UpdatedAt":         user.UpdatedAt,
+	return &userRepository{
+		db: db,
 	}
+}
 
-	_, err := r.db.Exec(ctx, query, args)
+func (r *userRepository) UpdateMetadata(ctx context.Context, userID int, avatarID string) error {
+	query := `UPDATE users SET avatar_id = $1 WHERE id = $2`
+
+	commandTag, err := r.db.Exec(ctx, query, avatarID, userID)
 	if err != nil {
-		return fmt.Errorf("unable to insert row: %w", err)
+		return utils.NewErrorStruct(500, "Failed to update user metadata")
 	}
 
-	return nil
-}
-func (r *userRepository) UpdateUser(ctx context.Context, user *models.User) error {
-	query := `UPDATE users SET email = @Email, password = @Password, name = @Name, 
-	          profile_picture_url = @ProfilePictureURL, phone_number = @PhoneNumber, 
-	          role = @Role, updated_at = @UpdatedAt WHERE id = @ID`
-
-	args := pgx.NamedArgs{
-		"ID":                user.ID,
-		"Password":          user.Password,
-		"Name":              user.Username,
-		"ProfilePictureURL": user.Avatar,
-		"Role":              user.Type,
-		"UpdatedAt":         user.UpdatedAt,
-	}
-
-	_, err := r.db.Exec(ctx, query, args)
-	if err != nil {
-		return fmt.Errorf("unable to update user: %w", err)
+	if commandTag.RowsAffected() == 0 {
+		return utils.NewErrorStruct(404, "User not found")
 	}
 
 	return nil
 }
 
-func (r *userRepository) DeleteUser(ctx context.Context, id uint) error {
-	query := `DELETE FROM users WHERE id = @ID`
+func (r *userRepository) GetUserMetadataBulk(ctx context.Context, userIDs []string) ([]schemas.UserMetadataResponse, error) {
+	query := `
+		SELECT u.id, a.image_url 
+		FROM users u 
+		LEFT JOIN avatars a ON u.avatar_id = a.id 
+		WHERE u.id = ANY($1::integer[])
+	`
 
-	args := pgx.NamedArgs{
-		"ID": id,
+	var intIDs []int
+	for _, id := range userIDs {
+		intID, err := strconv.Atoi(id)
+		if err != nil {
+			logger.New().Error(err)
+			return nil, utils.NewErrorStruct(400, "Invalid user ID format")
+		}
+		intIDs = append(intIDs, intID)
 	}
 
-	_, err := r.db.Exec(ctx, query, args)
+	rows, err := r.db.Query(ctx, query, intIDs)
 	if err != nil {
-		return fmt.Errorf("unable to delete user: %w", err)
-	}
-
-	return nil
-}
-
-func (r *userRepository) GetAllUsers(ctx context.Context) ([]models.User, error) {
-	query := `SELECT id, email, password, name, profile_picture_url, phone_number, role, created_at, updated_at FROM users`
-	rows, err := r.db.Query(ctx, query)
-	if err != nil {
-		return nil, fmt.Errorf("unable to retrieve users: %w", err)
+		logger.New().Error(err)
+		return nil, utils.NewErrorStruct(500, "Failed to fetch user metadata")
 	}
 	defer rows.Close()
 
-	var users []models.User
+	var metadata []schemas.UserMetadataResponse
 	for rows.Next() {
-		var user models.User
-		err := rows.Scan(
-			&user.ID, &user.Password, &user.Username,
-			&user.Avatar, &user.Type,
-			&user.CreatedAt, &user.UpdatedAt,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("error scanning row: %w", err)
+		var response schemas.UserMetadataResponse
+		var id int
+		if err := rows.Scan(&id, &response.ImageURL); err != nil {
+			logger.New().Error(err)
+			return nil, utils.NewErrorStruct(500, "Failed to scan user metadata")
 		}
-		users = append(users, user)
+		response.UserID = strconv.Itoa(id)
+		metadata = append(metadata, response)
 	}
-
-	if rows.Err() != nil {
-		return nil, fmt.Errorf("row iteration error: %w", rows.Err())
-	}
-
-	return users, nil
+	return metadata, nil
 }

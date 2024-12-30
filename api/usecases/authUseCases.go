@@ -22,7 +22,7 @@ func (auth *AuthUseCase) SignUp(ctx context.Context, req *schemas.SignUpRequest)
 	// Add registration logic, such as validation, business rules, etc.
 
 	var user models.User
-	var userID int
+	var userID string
 	var err error
 
 	user.Username = req.Username

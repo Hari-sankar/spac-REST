@@ -2,20 +2,18 @@ package routes
 
 import (
 	"spac-REST/api/controllers"
+	middleware "spac-REST/api/middlewares"
 	"spac-REST/api/usecases"
 
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterUserRoutes(router *gin.Engine, userUseCase usecases.UserUseCase) {
-	userController := controllers.NewUserController(userUseCase)
+	userController := controllers.NewUserController(&userUseCase)
 
-	userRoutes := router.Group("/users")
+	userRoutes := router.Group("/users").Use(middleware.AuthenticateRequest)
 	{
-		userRoutes.POST("/", userController.CreateUser)
-		userRoutes.GET("/:id", userController.GetUserByID)
-		userRoutes.GET("/", userController.GetAllUsers)
-		userRoutes.PUT("/:id", userController.UpdateUser)
-		userRoutes.DELETE("/:id", userController.DeleteUser)
+		userRoutes.POST("/metadata", userController.UpdateMetadata)
+		userRoutes.GET("/metadata/bulk", userController.GetUserMetadataBulk)
 	}
 }

@@ -1,0 +1,270 @@
+basePath: /
+definitions:
+  schemas.AvatarResponse:
+    properties:
+      id:
+        type: string
+      imageUrl:
+        type: string
+      name:
+        type: string
+    type: object
+  schemas.GetAvatarsResponse:
+    properties:
+      avatars:
+        items:
+          $ref: '#/definitions/schemas.AvatarResponse'
+        type: array
+    type: object
+  schemas.GetUserMetadataBulkResponse:
+    properties:
+      avatars:
+        items:
+          $ref: '#/definitions/schemas.UserMetadataResponse'
+        type: array
+    type: object
+  schemas.SignInRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  schemas.SignInResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  schemas.SignUpRequest:
+    properties:
+      password:
+        maxLength: 100
+        minLength: 8
+        type: string
+      type:
+        enum:
+        - Admin
+        - User
+        type: string
+      username:
+        maxLength: 30
+        minLength: 3
+        type: string
+    required:
+    - password
+    - type
+    - username
+    type: object
+  schemas.SignUpResponse:
+    properties:
+      userId:
+        type: string
+    type: object
+  schemas.UpdateMetadataRequest:
+    properties:
+      avatarId:
+        type: string
+    required:
+    - avatarId
+    type: object
+  schemas.UpdateMetadataResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
+  schemas.UserMetadataResponse:
+    properties:
+      imageUrl:
+        type: string
+      userId:
+        type: string
+    type: object
+  utils.ErrorStruct:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: A RESTful API service for SPAC
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: SPAC REST API
+  version: "1.0"
+paths:
+  /auth/signin:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT token
+      parameters:
+      - description: Sign in credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.SignInRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.SignInResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      summary: Login user
+      tags:
+      - auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with username, password and type
+      parameters:
+      - description: Sign up request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.SignUpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.SignUpResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "409":
+          description: Username already exists
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "503":
+          description: Database connection error
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      summary: Register a new user
+      tags:
+      - auth
+  /avatars:
+    get:
+      description: Get list of all available avatars
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.GetAvatarsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      security:
+      - BearerAuth: []
+      summary: Get available avatars
+      tags:
+      - avatars
+  /users/metadata:
+    post:
+      consumes:
+      - application/json
+      description: Update user's avatar and other metadata
+      parameters:
+      - description: Update metadata request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.UpdateMetadataRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.UpdateMetadataResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "401":
+          description: Invalid token
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      security:
+      - BearerAuth: []
+      summary: Update user metadata
+      tags:
+      - users
+  /users/metadata/bulk:
+    get:
+      description: Get metadata for multiple users
+      parameters:
+      - description: 'User IDs array format: [1,2,3]'
+        in: query
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.GetUserMetadataBulkResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      security:
+      - BearerAuth: []
+      summary: Get users metadata bulk
+      tags:
+      - users
+schemes:
+- http
+- https
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
