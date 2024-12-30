@@ -1,5 +1,16 @@
 basePath: /
 definitions:
+  models.Space:
+    properties:
+      dimensions:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      thumbnail:
+        type: string
+    type: object
   schemas.AvatarResponse:
     properties:
       id:
@@ -8,6 +19,31 @@ definitions:
         type: string
       name:
         type: string
+    type: object
+  schemas.CreateSpaceRequest:
+    properties:
+      dimensions:
+        type: string
+      mapId:
+        type: string
+      name:
+        type: string
+    required:
+    - dimensions
+    - mapId
+    - name
+    type: object
+  schemas.CreateSpaceResponse:
+    properties:
+      spaceId:
+        type: string
+    type: object
+  schemas.GetAllSpacesResponse:
+    properties:
+      spaces:
+        items:
+          $ref: '#/definitions/models.Space'
+        type: array
     type: object
   schemas.GetAvatarsResponse:
     properties:
@@ -190,6 +226,101 @@ paths:
       summary: Get available avatars
       tags:
       - avatars
+  /space:
+    post:
+      consumes:
+      - application/json
+      description: Create a space with specified name, dimensions and map ID
+      parameters:
+      - description: Space creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.CreateSpaceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.CreateSpaceResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      security:
+      - BearerAuth: []
+      summary: Create a new space
+      tags:
+      - spaces
+  /space/{spaceId}:
+    delete:
+      description: Delete a space by its ID
+      parameters:
+      - description: Space ID
+        example: 123e4567-e89b-12d3-a456-426614174000
+        in: path
+        name: spaceId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted
+        "400":
+          description: Invalid space ID
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "404":
+          description: Space not found
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      security:
+      - BearerAuth: []
+      summary: Delete a space
+      tags:
+      - spaces
+  /space/all:
+    get:
+      description: Get all spaces for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.GetAllSpacesResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      security:
+      - BearerAuth: []
+      summary: Get all spaces
+      tags:
+      - spaces
   /users/metadata:
     post:
       consumes:

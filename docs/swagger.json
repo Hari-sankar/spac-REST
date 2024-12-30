@@ -157,6 +157,156 @@
                 }
             }
         },
+        "/space": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a space with specified name, dimensions and map ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "spaces"
+                ],
+                "summary": "Create a new space",
+                "parameters": [
+                    {
+                        "description": "Space creation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schemas.CreateSpaceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemas.CreateSpaceResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    }
+                }
+            }
+        },
+        "/space/all": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all spaces for the authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "spaces"
+                ],
+                "summary": "Get all spaces",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemas.GetAllSpacesResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    }
+                }
+            }
+        },
+        "/space/{spaceId}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a space by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "spaces"
+                ],
+                "summary": "Delete a space",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "123e4567-e89b-12d3-a456-426614174000",
+                        "description": "Space ID",
+                        "name": "spaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully deleted"
+                    },
+                    "400": {
+                        "description": "Invalid space ID",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    },
+                    "404": {
+                        "description": "Space not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    }
+                }
+            }
+        },
         "/users/metadata": {
             "post": {
                 "security": [
@@ -268,6 +418,23 @@
         }
     },
     "definitions": {
+        "models.Space": {
+            "type": "object",
+            "properties": {
+                "dimensions": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "thumbnail": {
+                    "type": "string"
+                }
+            }
+        },
         "schemas.AvatarResponse": {
             "type": "object",
             "properties": {
@@ -279,6 +446,44 @@
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "schemas.CreateSpaceRequest": {
+            "type": "object",
+            "required": [
+                "dimensions",
+                "mapId",
+                "name"
+            ],
+            "properties": {
+                "dimensions": {
+                    "type": "string"
+                },
+                "mapId": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemas.CreateSpaceResponse": {
+            "type": "object",
+            "properties": {
+                "spaceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemas.GetAllSpacesResponse": {
+            "type": "object",
+            "properties": {
+                "spaces": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Space"
+                    }
                 }
             }
         },
