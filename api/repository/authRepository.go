@@ -26,7 +26,7 @@ func NewAuthRepository(db *pgxpool.Pool) AuthRepository {
 }
 
 func (r *authRepository) CreateUser(ctx context.Context, user *models.User) (string, error) {
-	query := `INSERT INTO users (username, password, role)
+	query := `INSERT INTO "User" (username, password, role)
 			  VALUES (@Username, @Password, @Role)
 			  RETURNING id`
 
@@ -53,7 +53,7 @@ func (r *authRepository) CreateUser(ctx context.Context, user *models.User) (str
 }
 
 func (r *authRepository) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
-	query := `SELECT id, username, password, role FROM users WHERE username = $1`
+	query := `SELECT id, username, password, role FROM "User" WHERE username = $1`
 
 	var user models.User
 	err := r.db.QueryRow(ctx, query, username).Scan(

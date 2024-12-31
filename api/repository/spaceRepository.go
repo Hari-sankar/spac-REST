@@ -27,15 +27,9 @@ func NewSpaceRepository(db *pgxpool.Pool) SpaceRepository {
 
 func (r *spaceRepository) CreateSpace(ctx context.Context, space *schemas.CreateSpaceRequest, creatorID uuid.UUID) (uuid.UUID, error) {
 	query := `
-        INSERT INTO "Space" (name, width, height, creator_id)
+        INSERT INTO "Space" (name, mapId, creator_id)
         VALUES ($1, $2, $3, $4)
         RETURNING id`
-
-	// Parse dimensions into width and height
-	width, height, err := utils.ParseDimensions(space.Dimensions)
-	if err != nil {
-		return uuid.Nil, utils.NewErrorStruct(400, "Invalid dimensions format")
-	}
 
 	var spaceID uuid.UUID
 	err = r.db.QueryRow(ctx, query, space.Name, width, height, creatorID).Scan(&spaceID)
@@ -64,8 +58,8 @@ func (r *spaceRepository) DeleteSpace(ctx context.Context, spaceID uuid.UUID) er
 func (r *spaceRepository) GetAllSpaces(ctx context.Context, userID uuid.UUID) ([]models.Space, error) {
 	query := `
         SELECT id, name, width || 'x' || height as dimensions, thumbnail
-        FROM "spaces"
-        WHERE creator_id = $1`
+        FROM "Space"
+        WHERE creatorId = $1`
 
 	rows, err := r.db.Query(ctx, query, userID)
 	if err != nil {

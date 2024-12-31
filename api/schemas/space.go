@@ -7,9 +7,8 @@ import (
 )
 
 type CreateSpaceRequest struct {
-	Name       string    `json:"name" binding:"required"`
-	Dimensions string    `json:"dimensions" binding:"required"`
-	MapID      uuid.UUID `json:"mapId" binding:"required"`
+	Name  string    `json:"name" binding:"required"`
+	MapID uuid.UUID `json:"mapId" binding:"required"`
 }
 
 type CreateSpaceResponse struct {
