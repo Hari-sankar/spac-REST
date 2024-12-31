@@ -1,7 +1,0 @@
-CREATE TABLE "spaceElements" (
-    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    "elementId" UUID NOT NULL REFERENCES "Element"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    "spaceId" UUID NOT NULL REFERENCES "Space"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    "x" INTEGER NOT NULL,
-    "y" INTEGER NOT NULL
-);

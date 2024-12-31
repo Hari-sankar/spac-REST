@@ -1,8 +1,6 @@
 CREATE TABLE "Space" (
     "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    "name" TEXT NOT NULL,
-    "width" INTEGER NOT NULL,
-    "height" INTEGER NOT NULL,
-    "thumbnail" TEXT,
+    "name" TEXT NOT NULL UNIQUE,
+    "mapId" UUID NOT NULL REFERENCES "Map"("id") ON DELETE RESTRICT ON UPDATE CASCADE,    
     "creatorId" UUID NOT NULL REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
