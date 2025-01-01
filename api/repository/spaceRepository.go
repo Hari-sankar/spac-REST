@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"spac-REST/api/models"
 	"spac-REST/api/schemas"
 	"spac-REST/api/utils"
 	"spac-REST/pkg/logger"
@@ -14,7 +13,7 @@ import (
 type SpaceRepository interface {
 	CreateSpace(ctx context.Context, space *schemas.CreateSpaceRequest, creatorID uuid.UUID) (uuid.UUID, error)
 	DeleteSpace(ctx context.Context, spaceID uuid.UUID) error
-	GetAllSpaces(ctx context.Context, userID uuid.UUID) ([]models.Space, error)
+	GetAllSpaces(ctx context.Context, userID uuid.UUID) ([]schemas.SpaceResponse, error)
 }
 
 type spaceRepository struct {
@@ -27,13 +26,14 @@ func NewSpaceRepository(db *pgxpool.Pool) SpaceRepository {
 
 func (r *spaceRepository) CreateSpace(ctx context.Context, space *schemas.CreateSpaceRequest, creatorID uuid.UUID) (uuid.UUID, error) {
 	query := `
-        INSERT INTO "Space" (name, mapId, creator_id)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO "Space" (name, "mapId", "creatorId")
+        VALUES ($1, $2, $3)
         RETURNING id`
 
 	var spaceID uuid.UUID
-	err = r.db.QueryRow(ctx, query, space.Name, width, height, creatorID).Scan(&spaceID)
+	err := r.db.QueryRow(ctx, query, space.Name, space.MapID, creatorID).Scan(&spaceID)
 	if err != nil {
+		logger.New().Error(err.Error())
 		return uuid.Nil, utils.NewErrorStruct(500, "Failed to create space")
 	}
 
@@ -55,11 +55,11 @@ func (r *spaceRepository) DeleteSpace(ctx context.Context, spaceID uuid.UUID) er
 	return nil
 }
 
-func (r *spaceRepository) GetAllSpaces(ctx context.Context, userID uuid.UUID) ([]models.Space, error) {
+func (r *spaceRepository) GetAllSpaces(ctx context.Context, userID uuid.UUID) ([]schemas.SpaceResponse, error) {
 	query := `
-        SELECT id, name, width || 'x' || height as dimensions, thumbnail
-        FROM "Space"
-        WHERE creatorId = $1`
+        SELECT s.id, s.name, m.width || 'x' || m.height as dimensions, m.thumbnail
+        FROM "Space"  s JOIN "Map"  m ON (s."mapId" = m.id)  
+        WHERE "creatorId" = $1`
 
 	rows, err := r.db.Query(ctx, query, userID)
 	if err != nil {
@@ -67,10 +67,10 @@ func (r *spaceRepository) GetAllSpaces(ctx context.Context, userID uuid.UUID) ([
 		return nil, utils.NewErrorStruct(500, "Failed to fetch spaces")
 	}
 	defer rows.Close()
+	var spaces []schemas.SpaceResponse
 
-	var spaces []models.Space
 	for rows.Next() {
-		var space models.Space
+		var space schemas.SpaceResponse
 		if err := rows.Scan(&space.ID, &space.Name, &space.Dimensions, &space.Thumbnail); err != nil {
 			return nil, utils.NewErrorStruct(500, "Failed to scan space data")
 		}
