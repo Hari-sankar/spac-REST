@@ -15,7 +15,7 @@ func RegisterElementRoutes(router *gin.Engine, elementUseCase usecases.ElementUs
 	{
 		elementRoutes.POST("/", elementController.CreateElement)
 		elementRoutes.PUT("/:elementId", elementController.UpdateElement)
-		elementRoutes.GET("/", elementController.GetAllElements)
+		elementRoutes.GET("/all", elementController.GetAllElements)
 
 	}
 }

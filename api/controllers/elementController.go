@@ -106,9 +106,10 @@ func (ctrl *ElementController) UpdateElement(c *gin.Context) {
 // @Description Get a list of all available elements
 // @Tags elements
 // @Produce json
+// @Security BearerAuth
 // @Success 200 {object} schemas.GetAllElementsResponse
 // @Failure 500 {object} utils.ErrorStruct "Internal Server Error"
-// @Router /elements [get]
+// @Router /element/all [get]
 func (ctrl *ElementController) GetAllElements(c *gin.Context) {
 	response, err := ctrl.elementUseCase.GetAllElements(c.Request.Context())
 	if err != nil {

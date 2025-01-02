@@ -62,12 +62,13 @@ func (r *elementRepository) UpdateElement(ctx context.Context, elementID uuid.UU
 
 func (r *elementRepository) GetAllElements(ctx context.Context) ([]models.Element, error) {
 	query := `
-        SELECT id, image_url, width, height, static 
+        SELECT id, "imageUrl", width, height, static 
         FROM "Element"
         ORDER BY id`
 
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {
+		logger.New().Error(err)
 		return nil, utils.NewErrorStruct(500, "Failed to fetch elements")
 	}
 	defer rows.Close()
@@ -83,6 +84,7 @@ func (r *elementRepository) GetAllElements(ctx context.Context) ([]models.Elemen
 			&element.Static,
 		)
 		if err != nil {
+			logger.New().Error(err)
 			return nil, utils.NewErrorStruct(500, "Failed to scan element data")
 		}
 		elements = append(elements, element)
