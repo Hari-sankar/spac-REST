@@ -26,7 +26,7 @@ func NewUserRepository(db *pgxpool.Pool) UserRepository {
 }
 
 func (r *userRepository) UpdateMetadata(ctx context.Context, userID int, avatarID string) error {
-	query := `UPDATE users SET avatar_id = $1 WHERE id = $2`
+	query := `UPDATE "User" SET avatarId = $1 WHERE id = $2`
 
 	commandTag, err := r.db.Exec(ctx, query, avatarID, userID)
 	if err != nil {
@@ -42,9 +42,9 @@ func (r *userRepository) UpdateMetadata(ctx context.Context, userID int, avatarI
 
 func (r *userRepository) GetUserMetadataBulk(ctx context.Context, userIDs []string) ([]schemas.UserMetadataResponse, error) {
 	query := `
-		SELECT u.id, a.image_url 
-		FROM users u 
-		LEFT JOIN avatars a ON u.avatar_id = a.id 
+		SELECT u.id, a.imageUrl 
+		FROM "User" u 
+		LEFT JOIN "Avatar" a ON u.avatar_id = a.id 
 		WHERE u.id = ANY($1::integer[])
 	`
 

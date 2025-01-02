@@ -1,0 +1,8 @@
+CREATE TABLE "MapElements" (
+    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "mapId" UUID NOT NULL REFERENCES "Map"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    "elementId" UUID NOT NULL REFERENCES "Element"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    "x" INTEGER,
+    "y" INTEGER
+);
+

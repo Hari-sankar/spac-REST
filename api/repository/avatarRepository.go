@@ -22,7 +22,7 @@ func NewAvatarRepository(db *pgxpool.Pool) AvatarRepository {
 }
 
 func (r *avatarRepository) GetAvailableAvatars(ctx context.Context) ([]models.Avatar, error) {
-	query := `SELECT id, image_url, name FROM avatars`
+	query := `SELECT id, image_url, name FROM "Avatar"`
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {
 		logger.New().Error(err)
