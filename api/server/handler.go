@@ -15,6 +15,7 @@ func (s *Server) MapRoutes() {
 	authRepo := repository.NewAuthRepository(s.db)
 	avatarRepo := repository.NewAvatarRepository(s.db)
 	spaceRepo := repository.NewSpaceRepository(s.db)
+	elementRepo := repository.NewElementRepository(s.db)
 
 	// Initialize use cases
 
@@ -22,6 +23,7 @@ func (s *Server) MapRoutes() {
 	authUseCase := usecases.NewAuthUseCase(authRepo)
 	avatarUseCase := usecases.NewAvatarUseCase(avatarRepo)
 	spaceUseCase := usecases.NewSpaceUseCase(spaceRepo)
+	elementUseCase := usecases.NewElementUseCase(elementRepo)
 
 	// Initialize the Gin router
 	routes.RegisterTestRoutes(s.router)
@@ -29,5 +31,6 @@ func (s *Server) MapRoutes() {
 	routes.RegisterUserRoutes(s.router, *userUseCase)
 	routes.RegisterAvatarRoutes(s.router, *avatarUseCase)
 	routes.RegisterSpaceRoutes(s.router, *spaceUseCase)
+	routes.RegisterElementRoutes(s.router, *elementUseCase)
 
 }
