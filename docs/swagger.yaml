@@ -1,15 +1,17 @@
 basePath: /
 definitions:
-  models.Space:
+  models.Element:
     properties:
-      dimensions:
-        type: string
+      height:
+        type: integer
       id:
         type: string
-      name:
+      imageUrl:
         type: string
-      thumbnail:
-        type: string
+      static:
+        type: boolean
+      width:
+        type: integer
     type: object
   schemas.AvatarResponse:
     properties:
@@ -20,16 +22,49 @@ definitions:
       name:
         type: string
     type: object
+  schemas.CreateAvatarRequest:
+    properties:
+      imageUrl:
+        type: string
+      name:
+        type: string
+    required:
+    - imageUrl
+    - name
+    type: object
+  schemas.CreateAvatarResponse:
+    properties:
+      avatarId:
+        type: string
+    type: object
+  schemas.CreateElementRequest:
+    properties:
+      height:
+        type: integer
+      imageURL:
+        type: string
+      static:
+        type: boolean
+      width:
+        type: integer
+    required:
+    - height
+    - imageURL
+    - static
+    - width
+    type: object
+  schemas.CreateElementResponse:
+    properties:
+      id:
+        type: string
+    type: object
   schemas.CreateSpaceRequest:
     properties:
-      dimensions:
-        type: string
       mapId:
         type: string
       name:
         type: string
     required:
-    - dimensions
     - mapId
     - name
     type: object
@@ -38,11 +73,18 @@ definitions:
       spaceId:
         type: string
     type: object
+  schemas.GetAllElementsResponse:
+    properties:
+      elements:
+        items:
+          $ref: '#/definitions/models.Element'
+        type: array
+    type: object
   schemas.GetAllSpacesResponse:
     properties:
       spaces:
         items:
-          $ref: '#/definitions/models.Space'
+          $ref: '#/definitions/schemas.SpaceResponse'
         type: array
     type: object
   schemas.GetAvatarsResponse:
@@ -223,6 +265,42 @@ paths:
       summary: Register a new user
       tags:
       - auth
+  /avatar:
+    post:
+      consumes:
+      - application/json
+      description: Create an avatar with specified image URL and name
+      parameters:
+      - description: Avatar creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.CreateAvatarRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.CreateAvatarResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      security:
+      - BearerAuth: []
+      summary: Create a new avatar
+      tags:
+      - avatars
   /avatars:
     get:
       description: Get list of all available avatars
@@ -246,6 +324,102 @@ paths:
       summary: Get available avatars
       tags:
       - avatars
+  /element:
+    post:
+      consumes:
+      - application/json
+      description: Create an element with specified properties
+      parameters:
+      - description: Element creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.CreateElementRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.CreateElementResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      security:
+      - BearerAuth: []
+      summary: Create a new element
+      tags:
+      - elements
+  /element/{elementId}:
+    put:
+      consumes:
+      - application/json
+      description: Update an element's image URL
+      parameters:
+      - description: Element ID
+        in: path
+        name: elementId
+        required: true
+        type: string
+      - description: Element update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.UpdateElementRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "404":
+          description: Element not found
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      security:
+      - BearerAuth: []
+      summary: Update an element
+      tags:
+      - elements
+  /elements:
+    get:
+      description: Get a list of all available elements
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.GetAllElementsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      summary: Get all elements
+      tags:
+      - elements
   /space:
     post:
       consumes:

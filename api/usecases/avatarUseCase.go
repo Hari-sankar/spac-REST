@@ -34,3 +34,12 @@ func (u *AvatarUseCase) GetAvailableAvatars(ctx context.Context) (*schemas.GetAv
 	}
 	return response, nil
 }
+
+func (u *AvatarUseCase) CreateAvatar(ctx context.Context, req *schemas.CreateAvatarRequest) (*schemas.CreateAvatarResponse, error) {
+	avatarID, err := u.avatarRepo.CreateAvatar(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &schemas.CreateAvatarResponse{AvatarID: avatarID}, nil
+}
