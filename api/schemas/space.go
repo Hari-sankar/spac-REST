@@ -1,6 +1,8 @@
 package schemas
 
 import (
+	"spac-REST/api/models"
+
 	"github.com/google/uuid"
 )
 
@@ -20,6 +22,19 @@ type SpaceResponse struct {
 	Thumbnail  string    `json:"Thumbnail"`
 	CreatorID  uuid.UUID `json:"creatorID"`
 }
+
 type GetAllSpacesResponse struct {
 	Spaces []SpaceResponse `json:"spaces"`
+}
+
+type SpaceElement struct {
+	ID      int            `json:"id"`
+	Element models.Element `json:"element"`
+	X       int            `json:"x"`
+	Y       int            `json:"y"`
+}
+
+type GetSpaceResponse struct {
+	Dimensions string         `json:"dimensions"`
+	Elements   []SpaceElement `json:"elements"`
 }

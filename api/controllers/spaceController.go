@@ -89,7 +89,13 @@ func (ctrl *SpaceController) DeleteSpace(c *gin.Context) {
 		return
 	}
 
-	err = ctrl.spaceUseCase.DeleteSpace(c.Request.Context(), spaceID)
+	userID, err := uuid.Parse(c.GetString("userID"))
+	if err != nil {
+		c.Error(utils.NewErrorStruct(401, "Invalid user ID"))
+		return
+	}
+
+	err = ctrl.spaceUseCase.DeleteSpace(c.Request.Context(), spaceID, userID)
 	if err != nil {
 		c.Error(err)
 		return

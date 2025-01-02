@@ -27,8 +27,8 @@ func (u *SpaceUseCase) CreateSpace(ctx context.Context, req *schemas.CreateSpace
 	return &schemas.CreateSpaceResponse{SpaceID: spaceID}, nil
 }
 
-func (u *SpaceUseCase) DeleteSpace(ctx context.Context, spaceID uuid.UUID) error {
-	return u.spaceRepo.DeleteSpace(ctx, spaceID)
+func (u *SpaceUseCase) DeleteSpace(ctx context.Context, spaceID, creatorID uuid.UUID) error {
+	return u.spaceRepo.DeleteSpace(ctx, spaceID, creatorID)
 }
 
 func (u *SpaceUseCase) GetAllSpaces(ctx context.Context, userID uuid.UUID) (*schemas.GetAllSpacesResponse, error) {

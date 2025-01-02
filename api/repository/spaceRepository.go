@@ -7,13 +7,15 @@ import (
 	"spac-REST/pkg/logger"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type SpaceRepository interface {
 	CreateSpace(ctx context.Context, space *schemas.CreateSpaceRequest, creatorID uuid.UUID) (uuid.UUID, error)
-	DeleteSpace(ctx context.Context, spaceID uuid.UUID) error
+	DeleteSpace(ctx context.Context, spaceID, creatorID uuid.UUID) error
 	GetAllSpaces(ctx context.Context, userID uuid.UUID) ([]schemas.SpaceResponse, error)
+	GetSpace(ctx context.Context, spaceID uuid.UUID) (*schemas.GetSpaceResponse, error)
 }
 
 type spaceRepository struct {
@@ -40,10 +42,10 @@ func (r *spaceRepository) CreateSpace(ctx context.Context, space *schemas.Create
 	return spaceID, nil
 }
 
-func (r *spaceRepository) DeleteSpace(ctx context.Context, spaceID uuid.UUID) error {
-	query := `DELETE FROM "Space" WHERE id = $1`
+func (r *spaceRepository) DeleteSpace(ctx context.Context, spaceID uuid.UUID, creatorID uuid.UUID) error {
+	query := `DELETE FROM "Space" WHERE id = $1 and "creatorId = $2"`
 
-	commandTag, err := r.db.Exec(ctx, query, spaceID)
+	commandTag, err := r.db.Exec(ctx, query, spaceID, creatorID)
 	if err != nil {
 		return utils.NewErrorStruct(500, "Failed to delete space")
 	}
@@ -78,4 +80,70 @@ func (r *spaceRepository) GetAllSpaces(ctx context.Context, userID uuid.UUID) ([
 	}
 
 	return spaces, nil
+}
+
+//function to get a space and its element details
+
+func (r *spaceRepository) GetSpace(ctx context.Context, spaceID uuid.UUID) (*schemas.GetSpaceResponse, error) {
+	// First get space dimensions from map
+	dimensionsQuery := `
+        SELECT m.width || 'x' || m.height as dimensions
+        FROM "Space" s
+        JOIN "Map" m ON s.map_id = m.id
+        WHERE s.id = $1`
+
+	var response schemas.GetSpaceResponse
+	err := r.db.QueryRow(ctx, dimensionsQuery, spaceID).Scan(&response.Dimensions)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, utils.NewErrorStruct(404, "Space not found")
+		}
+		return nil, utils.NewErrorStruct(500, "Failed to fetch space dimensions")
+	}
+
+	// Then get elements
+	elementsQuery := `
+        SELECT 
+            me.id,
+            e.id as element_id,
+            e.image_url,
+            e.static,
+            e.height,
+            e.width,
+            me.x,
+            me.y
+        FROM "MapElements" me
+        JOIN "Element" e ON me.element_id = e.id
+        JOIN "Space" s ON s.map_id = me.map_id
+        WHERE s.id = $1`
+
+	rows, err := r.db.Query(ctx, elementsQuery, spaceID)
+	if err != nil {
+		return nil, utils.NewErrorStruct(500, "Failed to fetch space elements")
+	}
+	defer rows.Close()
+
+	var elements []schemas.SpaceElement
+	for rows.Next() {
+		var element schemas.SpaceElement
+		var elementID string
+		err := rows.Scan(
+			&element.ID,
+			&elementID,
+			&element.Element.ImageURL,
+			&element.Element.Static,
+			&element.Element.Height,
+			&element.Element.Width,
+			&element.X,
+			&element.Y,
+		)
+		if err != nil {
+			return nil, utils.NewErrorStruct(500, "Failed to scan element data")
+		}
+		element.Element.ID, _ = uuid.Parse(elementID)
+		elements = append(elements, element)
+	}
+
+	response.Elements = elements
+	return &response, nil
 }
