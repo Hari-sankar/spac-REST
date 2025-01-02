@@ -159,6 +159,263 @@ const docTemplate = `{
                 }
             }
         },
+        "/element": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create an element with specified properties",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "elements"
+                ],
+                "summary": "Create a new element",
+                "parameters": [
+                    {
+                        "description": "Element creation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schemas.CreateElementRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemas.CreateElementResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    }
+                }
+            }
+        },
+        "/element/all": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a list of all available elements",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "elements"
+                ],
+                "summary": "Get all elements",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemas.GetAllElementsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    }
+                }
+            }
+        },
+        "/element/{elementId}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update an element's image URL",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "elements"
+                ],
+                "summary": "Update an element",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Element ID",
+                        "name": "elementId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Element update request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schemas.UpdateElementRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated"
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    },
+                    "404": {
+                        "description": "Element not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorStruct"
+                        }
+                    }
+                }
+            }
+        },
+        "/map": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a map with specified properties",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "maps"
+                ],
+                "summary": "Create a new map",
+                "parameters": [
+                    {
+                        "description": "Map creation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schemas.CreateMapRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemas.CreateMapResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/map/all": {
+            "get": {
+                "description": "Get a list of all available maps",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "maps"
+                ],
+                "summary": "Get all maps",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schemas.GetAllMapsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/map/{mapId}/elements": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Add multiple elements to an existing map",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "maps"
+                ],
+                "summary": "Add elements to a map",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Map ID",
+                        "name": "mapId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Map elements to add",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schemas.AddMapElementRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/space": {
             "post": {
                 "security": [
@@ -420,20 +677,57 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.Space": {
+        "models.Element": {
             "type": "object",
             "properties": {
-                "dimensions": {
+                "height": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "imageUrl": {
+                    "type": "string"
+                },
+                "static": {
+                    "type": "boolean"
+                },
+                "width": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.MapElement": {
+            "type": "object",
+            "properties": {
+                "X": {
+                    "type": "integer"
+                },
+                "Y": {
+                    "type": "integer"
+                },
+                "elementID": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
-                "name": {
+                "mapID": {
                     "type": "string"
-                },
-                "thumbnail": {
-                    "type": "string"
+                }
+            }
+        },
+        "schemas.AddMapElementRequest": {
+            "type": "object",
+            "required": [
+                "elements"
+            ],
+            "properties": {
+                "elements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MapElement"
+                    }
                 }
             }
         },
@@ -451,17 +745,71 @@ const docTemplate = `{
                 }
             }
         },
-        "schemas.CreateSpaceRequest": {
+        "schemas.CreateElementRequest": {
+            "type": "object",
+            "required": [
+                "height",
+                "imageURL",
+                "static",
+                "width"
+            ],
+            "properties": {
+                "height": {
+                    "type": "integer"
+                },
+                "imageURL": {
+                    "type": "string"
+                },
+                "static": {
+                    "type": "boolean"
+                },
+                "width": {
+                    "type": "integer"
+                }
+            }
+        },
+        "schemas.CreateElementResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemas.CreateMapRequest": {
             "type": "object",
             "required": [
                 "dimensions",
-                "mapId",
-                "name"
+                "name",
+                "thumbnail"
             ],
             "properties": {
                 "dimensions": {
                     "type": "string"
                 },
+                "name": {
+                    "type": "string"
+                },
+                "thumbnail": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemas.CreateMapResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemas.CreateSpaceRequest": {
+            "type": "object",
+            "required": [
+                "mapId",
+                "name"
+            ],
+            "properties": {
                 "mapId": {
                     "type": "string"
                 },
@@ -478,13 +826,35 @@ const docTemplate = `{
                 }
             }
         },
+        "schemas.GetAllElementsResponse": {
+            "type": "object",
+            "properties": {
+                "elements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Element"
+                    }
+                }
+            }
+        },
+        "schemas.GetAllMapsResponse": {
+            "type": "object",
+            "properties": {
+                "maps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schemas.MapResponse"
+                    }
+                }
+            }
+        },
         "schemas.GetAllSpacesResponse": {
             "type": "object",
             "properties": {
                 "spaces": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Space"
+                        "$ref": "#/definitions/schemas.SpaceResponse"
                     }
                 }
             }
@@ -508,6 +878,23 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/schemas.UserMetadataResponse"
                     }
+                }
+            }
+        },
+        "schemas.MapResponse": {
+            "type": "object",
+            "properties": {
+                "dimensions": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "thumbnail": {
+                    "type": "string"
                 }
             }
         },
@@ -565,6 +952,37 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemas.SpaceResponse": {
+            "type": "object",
+            "properties": {
+                "Thumbnail": {
+                    "type": "string"
+                },
+                "creatorID": {
+                    "type": "string"
+                },
+                "dimensions": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemas.UpdateElementRequest": {
+            "type": "object",
+            "required": [
+                "imageUrl"
+            ],
+            "properties": {
+                "imageUrl": {
                     "type": "string"
                 }
             }

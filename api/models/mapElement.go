@@ -3,11 +3,11 @@ package models
 import "github.com/google/uuid"
 
 type MapElement struct {
-	ID       uuid.UUID `json:"id"`
-	ImageURL string    `json:"imageUrl"`
-	Static   bool      `json:"static"`
-	Height   int       `json:"height"`
-	Width    int       `json:"width"`
+	ID        uuid.UUID `json:"id"`
+	MapID     uuid.UUID `json:"mapID"`
+	ElementID uuid.UUID `json:"elementID"`
+	X         int       `json:"X"`
+	Y         int       `json:"Y"`
 }
 
 // TableName specifies the table name for the Element model

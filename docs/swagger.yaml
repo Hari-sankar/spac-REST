@@ -1,15 +1,39 @@
 basePath: /
 definitions:
-  models.Space:
+  models.Element:
     properties:
-      dimensions:
+      height:
+        type: integer
+      id:
+        type: string
+      imageUrl:
+        type: string
+      static:
+        type: boolean
+      width:
+        type: integer
+    type: object
+  models.MapElement:
+    properties:
+      X:
+        type: integer
+      "Y":
+        type: integer
+      elementID:
         type: string
       id:
         type: string
-      name:
+      mapID:
         type: string
-      thumbnail:
-        type: string
+    type: object
+  schemas.AddMapElementRequest:
+    properties:
+      elements:
+        items:
+          $ref: '#/definitions/models.MapElement'
+        type: array
+    required:
+    - elements
     type: object
   schemas.AvatarResponse:
     properties:
@@ -20,16 +44,52 @@ definitions:
       name:
         type: string
     type: object
-  schemas.CreateSpaceRequest:
+  schemas.CreateElementRequest:
+    properties:
+      height:
+        type: integer
+      imageURL:
+        type: string
+      static:
+        type: boolean
+      width:
+        type: integer
+    required:
+    - height
+    - imageURL
+    - static
+    - width
+    type: object
+  schemas.CreateElementResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  schemas.CreateMapRequest:
     properties:
       dimensions:
         type: string
+      name:
+        type: string
+      thumbnail:
+        type: string
+    required:
+    - dimensions
+    - name
+    - thumbnail
+    type: object
+  schemas.CreateMapResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  schemas.CreateSpaceRequest:
+    properties:
       mapId:
         type: string
       name:
         type: string
     required:
-    - dimensions
     - mapId
     - name
     type: object
@@ -38,11 +98,25 @@ definitions:
       spaceId:
         type: string
     type: object
+  schemas.GetAllElementsResponse:
+    properties:
+      elements:
+        items:
+          $ref: '#/definitions/models.Element'
+        type: array
+    type: object
+  schemas.GetAllMapsResponse:
+    properties:
+      maps:
+        items:
+          $ref: '#/definitions/schemas.MapResponse'
+        type: array
+    type: object
   schemas.GetAllSpacesResponse:
     properties:
       spaces:
         items:
-          $ref: '#/definitions/models.Space'
+          $ref: '#/definitions/schemas.SpaceResponse'
         type: array
     type: object
   schemas.GetAvatarsResponse:
@@ -58,6 +132,17 @@ definitions:
         items:
           $ref: '#/definitions/schemas.UserMetadataResponse'
         type: array
+    type: object
+  schemas.MapResponse:
+    properties:
+      dimensions:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      thumbnail:
+        type: string
     type: object
   schemas.SignInRequest:
     properties:
@@ -98,6 +183,26 @@ definitions:
     properties:
       userId:
         type: string
+    type: object
+  schemas.SpaceResponse:
+    properties:
+      Thumbnail:
+        type: string
+      creatorID:
+        type: string
+      dimensions:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  schemas.UpdateElementRequest:
+    properties:
+      imageUrl:
+        type: string
+    required:
+    - imageUrl
     type: object
   schemas.UpdateMetadataRequest:
     properties:
@@ -226,6 +331,168 @@ paths:
       summary: Get available avatars
       tags:
       - avatars
+  /element:
+    post:
+      consumes:
+      - application/json
+      description: Create an element with specified properties
+      parameters:
+      - description: Element creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.CreateElementRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.CreateElementResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      security:
+      - BearerAuth: []
+      summary: Create a new element
+      tags:
+      - elements
+  /element/{elementId}:
+    put:
+      consumes:
+      - application/json
+      description: Update an element's image URL
+      parameters:
+      - description: Element ID
+        in: path
+        name: elementId
+        required: true
+        type: string
+      - description: Element update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.UpdateElementRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "404":
+          description: Element not found
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      security:
+      - BearerAuth: []
+      summary: Update an element
+      tags:
+      - elements
+  /element/all:
+    get:
+      description: Get a list of all available elements
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.GetAllElementsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorStruct'
+      security:
+      - BearerAuth: []
+      summary: Get all elements
+      tags:
+      - elements
+  /map:
+    post:
+      consumes:
+      - application/json
+      description: Create a map with specified properties
+      parameters:
+      - description: Map creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.CreateMapRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.CreateMapResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new map
+      tags:
+      - maps
+  /map/{mapId}/elements:
+    post:
+      consumes:
+      - application/json
+      description: Add multiple elements to an existing map
+      parameters:
+      - description: Map ID
+        in: path
+        name: mapId
+        required: true
+        type: string
+      - description: Map elements to add
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.AddMapElementRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Add elements to a map
+      tags:
+      - maps
+  /map/all:
+    get:
+      description: Get a list of all available maps
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.GetAllMapsResponse'
+      summary: Get all maps
+      tags:
+      - maps
   /space:
     post:
       consumes:
