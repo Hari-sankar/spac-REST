@@ -99,6 +99,26 @@ definitions:
       userId:
         type: string
     type: object
+  schemas.SpaceResponse:
+    properties:
+      Thumbnail:
+        type: string
+      creatorID:
+        type: string
+      dimensions:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  schemas.UpdateElementRequest:
+    properties:
+      imageUrl:
+        type: string
+    required:
+    - imageUrl
+    type: object
   schemas.UpdateMetadataRequest:
     properties:
       avatarId:

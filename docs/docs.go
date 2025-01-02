@@ -569,6 +569,37 @@ const docTemplate = `{
                 }
             }
         },
+        "schemas.SpaceResponse": {
+            "type": "object",
+            "properties": {
+                "Thumbnail": {
+                    "type": "string"
+                },
+                "creatorID": {
+                    "type": "string"
+                },
+                "dimensions": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemas.UpdateElementRequest": {
+            "type": "object",
+            "required": [
+                "imageUrl"
+            ],
+            "properties": {
+                "imageUrl": {
+                    "type": "string"
+                }
+            }
+        },
         "schemas.UpdateMetadataRequest": {
             "type": "object",
             "required": [
