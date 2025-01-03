@@ -38,3 +38,16 @@ type GetSpaceResponse struct {
 	Dimensions string         `json:"dimensions"`
 	Elements   []SpaceElement `json:"elements"`
 }
+
+type SpaceDimension struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+type SpaceValidationResponse struct {
+	Valid    bool      `json:"valid"`
+	Width    int       `json:"width"`
+	Height   int       `json:"height"`
+	UserID   uuid.UUID `json:"userId"`
+	Username string    `json:"username"`
+}

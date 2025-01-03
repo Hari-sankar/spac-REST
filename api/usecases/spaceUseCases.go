@@ -39,3 +39,15 @@ func (u *SpaceUseCase) GetAllSpaces(ctx context.Context, userID uuid.UUID) (*sch
 
 	return &schemas.GetAllSpacesResponse{Spaces: spaces}, nil
 }
+
+// func (u *SpaceUseCase) ValidateSpace(ctx context.Context, userID,spaceID uuid.UUID,username) (*schemas.SpaceValidationResponse, error) {
+// 	var response  schemas.SpaceValidationResponse
+
+// 	response.UserID =
+// 	spaces, err := u.spaceRepo.GetAllSpaces(ctx, spaceID)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return &schemas.GetAllSpacesResponse{Spaces: spaces}, nil
+// }

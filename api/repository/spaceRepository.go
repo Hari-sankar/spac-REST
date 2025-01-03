@@ -15,7 +15,7 @@ type SpaceRepository interface {
 	CreateSpace(ctx context.Context, space *schemas.CreateSpaceRequest, creatorID uuid.UUID) (uuid.UUID, error)
 	DeleteSpace(ctx context.Context, spaceID, creatorID uuid.UUID) error
 	GetAllSpaces(ctx context.Context, userID uuid.UUID) ([]schemas.SpaceResponse, error)
-	GetSpace(ctx context.Context, spaceID uuid.UUID) (*schemas.GetSpaceResponse, error)
+	GetSpaceWithElements(ctx context.Context, spaceID uuid.UUID) (*schemas.GetSpaceResponse, error)
 }
 
 type spaceRepository struct {
@@ -84,7 +84,7 @@ func (r *spaceRepository) GetAllSpaces(ctx context.Context, userID uuid.UUID) ([
 
 //function to get a space and its element details
 
-func (r *spaceRepository) GetSpace(ctx context.Context, spaceID uuid.UUID) (*schemas.GetSpaceResponse, error) {
+func (r *spaceRepository) GetSpaceWithElements(ctx context.Context, spaceID uuid.UUID) (*schemas.GetSpaceResponse, error) {
 	// First get space dimensions from map
 	dimensionsQuery := `
         SELECT m.width || 'x' || m.height as dimensions
@@ -145,5 +145,32 @@ func (r *spaceRepository) GetSpace(ctx context.Context, spaceID uuid.UUID) (*sch
 	}
 
 	response.Elements = elements
+	return &response, nil
+}
+
+func (r *spaceRepository) GetSpaceDimension(ctx context.Context, spaceID uuid.UUID) (*schemas.SpaceDimension, error) {
+	query := `
+        SELECT 
+            m.width,
+            m.height,
+            u.id as user_id,
+            u.username
+        FROM "Space" s
+        JOIN "Map" m ON s.map_id = m.id
+        WHERE s.id = $1`
+
+	var response schemas.SpaceDimension
+	err := r.db.QueryRow(ctx, query, spaceID).Scan(
+		&response.Width,
+		&response.Height,
+	)
+
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, utils.NewErrorStruct(404, "Space not found")
+		}
+		return nil, utils.NewErrorStruct(500, "Failed to fetch space details")
+	}
+
 	return &response, nil
 }
